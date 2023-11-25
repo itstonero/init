@@ -1,0 +1,31 @@
+version: "3"
+
+networks:
+  web:
+    external: true
+
+volumes:
+  portainer:
+
+services:
+  error-pages:
+    container_name: error-pages
+    image: romancin/traefik-custom-error-pages
+    labels:
+      - traefik.http.routers.error-pages.tls=true
+      - traefik.http.routers.error-pages.tls.certresolver=lets-encrypt
+      - traefik.port=80
+    networks:
+      - web
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ee:latest
+    command: -H unix:///var/run/docker.sock
+    labels:
+      - traefik.http.routers.portainer.rule=Host(`portainer.$DOMAIN_NAME`)
+      - traefik.http.routers.portainer.tls=true
+      - traefik.http.routers.portainer.tls.certresolver=lets-encrypt
+      - traefik.port=9000
+    networks:
+      - web
